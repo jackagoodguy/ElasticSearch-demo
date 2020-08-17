@@ -6,6 +6,10 @@ import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +22,7 @@ import java.io.IOException;
  */
 @Service
 @Slf4j
-public class EsHighLevelRestService<R> {
+public class EsHighLevelRestService {
 
     @Autowired
     private RestHighLevelClient highLevelClient;
@@ -69,5 +73,37 @@ public class EsHighLevelRestService<R> {
         highLevelClient.getAsync(getRequest, RequestOptions.DEFAULT, getResponseListener);
     }
 
+
+    /**
+     * 创建索引内容
+     *
+     * @param createIndexRequest
+     * @return
+     */
+    public CreateIndexResponse clientCreateIndex(CreateIndexRequest createIndexRequest) {
+        try {
+            highLevelClient.indices().create(createIndexRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.info("create index Exception：" + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * 获取索引内容
+     *
+     * @param getIndexRequest
+     * @return
+     */
+    public GetIndexResponse clientGetIndex(GetIndexRequest getIndexRequest) {
+        try {
+            highLevelClient.indices().get(getIndexRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.info("get index Exception：" + e.getMessage());
+        }
+        return null;
+    }
 
 }

@@ -31,4 +31,11 @@ public class BookController {
     }
 
 
+    @GetMapping("/page")
+    public RestResultBody page(Integer size, Integer page) {
+
+        return RestResultBody.success();
+    }
+
+
 }
