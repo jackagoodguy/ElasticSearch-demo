@@ -52,11 +52,5 @@
 
 ## 我的
 
-公众号：
-
-https://cdn.nlark.com/yuque/0/2020/jpeg/236129/1591931262870-ff8ec9a2-2bae-4e39-bfb9-3694b07700a2.jpeg?x-oss-process=image%2Fresize%2Cw_158 
-
-
-
 [语雀主页点击访问](https://www.yuque.com/sourlemon)
 
