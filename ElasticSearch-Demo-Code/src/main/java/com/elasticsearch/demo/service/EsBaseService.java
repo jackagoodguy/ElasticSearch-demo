@@ -2,10 +2,15 @@ package com.elasticsearch.demo.service;
 
 import com.elasticsearch.demo.listener.GetResponseListener;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
+import org.elasticsearch.client.IndicesClient;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.TermVectorsRequest;
+import org.elasticsearch.client.core.TermVectorsResponse;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
@@ -22,7 +27,7 @@ import java.io.IOException;
  */
 @Service
 @Slf4j
-public class EsHighLevelRestService {
+public class EsBaseService {
 
     @Autowired
     private RestHighLevelClient highLevelClient;
@@ -75,14 +80,48 @@ public class EsHighLevelRestService {
 
 
     /**
-     * 创建索引内容
+     * 获取词向量信息
+     *
+     * @param termVectorsRequest
+     * @return
+     */
+    public TermVectorsResponse clientGetTermVector(TermVectorsRequest termVectorsRequest) {
+        try {
+            highLevelClient.termvectors(termVectorsRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.info("get termVectors Exception：" + e.getMessage());
+        }
+        return null;
+    }
+
+
+    /**
+     * 获取索引
+     *
+     * @param getIndexRequest
+     * @return
+     */
+    public GetIndexResponse clientGetIndex(GetIndexRequest getIndexRequest) {
+        try {
+            return highLevelClient.indices().get(getIndexRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.info("get index Exception：" + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * 创建索引
      *
      * @param createIndexRequest
      * @return
      */
     public CreateIndexResponse clientCreateIndex(CreateIndexRequest createIndexRequest) {
+        IndicesClient indicesClient = highLevelClient.indices();
         try {
-            highLevelClient.indices().create(createIndexRequest, RequestOptions.DEFAULT);
+            return indicesClient.create(createIndexRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
             e.printStackTrace();
             log.info("create index Exception：" + e.getMessage());
@@ -91,19 +130,38 @@ public class EsHighLevelRestService {
     }
 
     /**
-     * 获取索引内容
+     * 删除索引
+     *
+     * @param deleteIndexRequest
+     * @return
+     */
+    public AcknowledgedResponse clientDeleteIndex(DeleteIndexRequest deleteIndexRequest) {
+        IndicesClient indicesClient = highLevelClient.indices();
+        try {
+            return indicesClient.delete(deleteIndexRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.info("create index Exception：" + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * 是否存在索引
      *
      * @param getIndexRequest
      * @return
      */
-    public GetIndexResponse clientGetIndex(GetIndexRequest getIndexRequest) {
+    public Boolean clientExistIndex(GetIndexRequest getIndexRequest) {
+        IndicesClient indicesClient = highLevelClient.indices();
         try {
-            highLevelClient.indices().get(getIndexRequest, RequestOptions.DEFAULT);
+            return indicesClient.exists(getIndexRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
             e.printStackTrace();
-            log.info("get index Exception：" + e.getMessage());
+            log.info("exist index Exception：" + e.getMessage());
         }
         return null;
     }
+
 
 }

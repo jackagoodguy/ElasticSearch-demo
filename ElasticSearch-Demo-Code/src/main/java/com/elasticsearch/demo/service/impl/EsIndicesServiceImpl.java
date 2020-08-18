@@ -1,6 +1,6 @@
 package com.elasticsearch.demo.service.impl;
 
-import com.elasticsearch.demo.service.EsHighLevelRestService;
+import com.elasticsearch.demo.service.EsBaseService;
 import com.elasticsearch.demo.service.EsIndexService;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
  * @Date: 2020/8/17 14:21
  */
 @Service
-public class EsIndicesServiceImpl extends EsHighLevelRestService implements EsIndexService {
+public class EsIndicesServiceImpl extends EsBaseService implements EsIndexService {
 
     @Override
     public CreateIndexResponse createIndex(CreateIndexRequest createIndexRequest) {
@@ -23,5 +23,10 @@ public class EsIndicesServiceImpl extends EsHighLevelRestService implements EsIn
     @Override
     public GetIndexResponse getIndex(GetIndexRequest getIndexRequest) {
         return clientGetIndex(getIndexRequest);
+    }
+
+    @Override
+    public Boolean existIndex(GetIndexRequest getIndexRequest) {
+        return clientExistIndex(getIndexRequest);
     }
 }

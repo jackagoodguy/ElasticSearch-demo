@@ -24,6 +24,9 @@ public class BookController {
     private EsGetService getService;
 
 
+
+
+
     @GetMapping("")
     public RestResultBody list(@RequestParam String id) {
         GetResponse getResponse = getService.getById(Constant.DEFAULT_ES_INDEX_NAME, id);

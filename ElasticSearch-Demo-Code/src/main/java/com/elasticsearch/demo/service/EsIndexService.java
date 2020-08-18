@@ -28,5 +28,13 @@ public interface EsIndexService {
      */
     GetIndexResponse getIndex(GetIndexRequest getIndexRequest);
 
+    /**
+     * 是否存在索引
+     *
+     * @param getIndexRequest
+     * @return
+     */
+    Boolean existIndex(GetIndexRequest getIndexRequest);
+
 
 }

@@ -11,5 +11,5 @@ public class Constant {
     /**
      * ElasticSearch index name
      */
-    public static final String DEFAULT_ES_INDEX_NAME = "books";
+    public static final String DEFAULT_ES_INDEX_NAME = "book";
 }
