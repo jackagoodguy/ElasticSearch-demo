@@ -5,7 +5,7 @@
 - 项目中所有ELK描述为：ElasticSearch+LogStash+Kibana
 - MySQL数据：使用[ElasticSearch-DataSql文件夹](https://github.com/ShayLau/ElasticSearch-demo/blob/master/ElasticSearch-Demo-DataSql/book.sql)中提供的book.sql文件（数据库自建）
 - [ElasticSearch（点击下载）](https://www.elastic.co/downloads/past-releases/elasticsearch-7-2-1)、[LogStash（点击下载）](https://www.elastic.co/downloads/past-releases/logstash-7-2-1)、[Kibana（点击下载）](https://www.elastic.co/downloads/past-releases/kibana-7-2-1)，项目ELK均使用7.2.1版本
-- 使用说明：本文档描述实际操作在Windows电脑操作，如果使用Linux或者MacOS请查阅相关资料，或者提Pull Request补全文档**
+- 使用说明：本文档描述实际操作在Windows电脑操作，如果使用Linux或者MacOS请查阅相关资料，或者提Pull Request补全文档
 <a name="QWIXq"></a>
 ## ELK部署使用
 [ElasticSearch部署说明]()<br />[LogStash部署说明]()<br />[Kibana部署说明](https://www.yuque.com/sourlemon/java/buwl0q)<br />
@@ -47,18 +47,16 @@
 <a name="SIFrl"></a>
 ## Github源码
 [查看源码仓库](https://github.com/ShayLau/ElasticSearch-demo)<br />
-<br />_
-<a name="8KJ11"></a>
-
-#### _
-<a name="SGVWE"></a>
-<center>End<center>
-
-<center>公众号：Java编码日志<center>
-
-<center>![qrcode_for_gh_f247e3bfaf7a_258.jpg](https://cdn.nlark.com/yuque/0/2020/jpeg/236129/1591931262870-ff8ec9a2-2bae-4e39-bfb9-3694b07700a2.jpeg#align=left&display=inline&height=158&margin=%5Bobject%20Object%5D&name=qrcode_for_gh_f247e3bfaf7a_258.jpg&originHeight=258&originWidth=258&size=27055&status=done&style=shadow&width=158)<center>
 
 
-​       
 
-<center>语雀主页：[点击访问](https://www.yuque.com/sourlemon)<br /><center>
+## 我的
+
+公众号：
+
+https://cdn.nlark.com/yuque/0/2020/jpeg/236129/1591931262870-ff8ec9a2-2bae-4e39-bfb9-3694b07700a2.jpeg?x-oss-process=image%2Fresize%2Cw_158 
+
+
+
+[语雀主页点击访问](https://www.yuque.com/sourlemon)
+
