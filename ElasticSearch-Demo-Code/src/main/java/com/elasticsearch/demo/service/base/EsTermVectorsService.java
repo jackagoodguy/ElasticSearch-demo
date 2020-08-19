@@ -1,4 +1,4 @@
-package com.elasticsearch.demo.service;
+package com.elasticsearch.demo.service.base;
 
 import org.elasticsearch.client.core.TermVectorsRequest;
 import org.elasticsearch.client.core.TermVectorsResponse;
@@ -12,6 +12,12 @@ import org.elasticsearch.client.core.TermVectorsResponse;
  */
 public interface EsTermVectorsService {
 
+    /**
+     * 获取词向量信息
+     *
+     * @param termVectorsRequest
+     * @return
+     */
     TermVectorsResponse getTermVector(TermVectorsRequest termVectorsRequest);
 
 }

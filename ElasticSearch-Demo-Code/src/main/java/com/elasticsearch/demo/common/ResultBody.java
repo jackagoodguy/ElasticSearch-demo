@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RestResultBody {
+public class ResultBody {
 
     /**
      * Rest请求结果响应码
@@ -30,37 +30,37 @@ public class RestResultBody {
      */
     private String message;
 
-    public RestResultBody(Integer code) {
+    public ResultBody(Integer code) {
         this.code = code;
     }
 
-    public RestResultBody(Integer code, Object data) {
+    public ResultBody(Integer code, Object data) {
         this.code = code;
         this.data = data;
     }
 
-    public RestResultBody(Integer code, String message) {
+    public ResultBody(Integer code, String message) {
         this.code = code;
         this.message = message;
     }
 
 
-    public static RestResultBody success() {
-        return new RestResultBody(ResultCodeEnum.SUCCESS.code());
+    public static ResultBody success() {
+        return new ResultBody(ResultCodeEnum.SUCCESS.code());
     }
 
-    public static RestResultBody success(Object data) {
-        return new RestResultBody(ResultCodeEnum.SUCCESS.code(), data);
-    }
-
-
-    public RestResultBody failure() {
-        return new RestResultBody(ResultCodeEnum.FAIlURE.code());
+    public static ResultBody success(Object data) {
+        return new ResultBody(ResultCodeEnum.SUCCESS.code(), data);
     }
 
 
-    public RestResultBody failure(String message) {
-        return new RestResultBody(ResultCodeEnum.FAIlURE.code(), message);
+    public ResultBody failure() {
+        return new ResultBody(ResultCodeEnum.FAIlURE.code());
+    }
+
+
+    public ResultBody failure(String message) {
+        return new ResultBody(ResultCodeEnum.FAIlURE.code(), message);
     }
 
 

@@ -1,4 +1,4 @@
-package com.elasticsearch.demo.service;
+package com.elasticsearch.demo.service.base;
 
 import com.elasticsearch.demo.listener.GetResponseListener;
 import org.elasticsearch.action.get.GetResponse;

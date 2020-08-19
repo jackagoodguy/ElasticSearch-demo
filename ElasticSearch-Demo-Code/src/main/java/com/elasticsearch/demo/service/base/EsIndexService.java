@@ -1,5 +1,7 @@
-package com.elasticsearch.demo.service;
+package com.elasticsearch.demo.service.base;
 
+import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.client.indices.*;
 
 /**
@@ -33,7 +35,16 @@ public interface EsIndexService {
      * @param getIndexRequest
      * @return
      */
-    Boolean existIndex(GetIndexRequest getIndexRequest);
+    boolean existIndex(GetIndexRequest getIndexRequest);
+
+    /**
+     * 删除索引
+     *
+     * @param deleteIndexRequest 删除索引请求
+     * @return
+     */
+    boolean deleteIndex(DeleteIndexRequest deleteIndexRequest);
+
 
     /**
      * 修改index Mapping信息
@@ -42,5 +53,16 @@ public interface EsIndexService {
      * @return
      */
     boolean putIndexMapping(PutMappingRequest putMappingRequest);
+
+    /**
+     * 索引别名操作
+     *
+     * @param indices   索引
+     * @param aliasName 索引别名
+     * @param type      索引别名操作类型
+     * @return
+     */
+    boolean indexAlias(String indices, String aliasName, IndicesAliasesRequest.AliasActions.Type type);
+
 
 }
