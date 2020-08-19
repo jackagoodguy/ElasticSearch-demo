@@ -19,16 +19,18 @@ public interface BookService {
     /**
      * 书本映射关系
      *
-     * @return
+     * @return 书本映射关系JSON字符串
      */
     static String indexMapping() {
         BookMapping bookMapping = new BookMapping();
-        bookMapping.setAuthor(new MappingFieldProperties(EsIndexFieldTypeEnum.TEXT.getType(), false));
-        bookMapping.setChineseTitle(new MappingFieldProperties(EsIndexFieldTypeEnum.TEXT.getType(), false));
-        bookMapping.setDescription(new MappingFieldProperties(EsIndexFieldTypeEnum.TEXT.getType(), false));
-        bookMapping.setIsbn(new MappingFieldProperties(EsIndexFieldTypeEnum.TEXT.getType(), false));
-        bookMapping.setSubTitle(new MappingFieldProperties(EsIndexFieldTypeEnum.TEXT.getType(), false));
-        bookMapping.setTitle(new MappingFieldProperties(EsIndexFieldTypeEnum.TEXT.getType(), false));
+        //文本类型
+        MappingFieldProperties textFieldProperties = new MappingFieldProperties(EsIndexFieldTypeEnum.TEXT.getType());
+        bookMapping.setAuthor(textFieldProperties);
+        bookMapping.setChineseTitle(textFieldProperties);
+        bookMapping.setDescription(textFieldProperties);
+        bookMapping.setIsbn(textFieldProperties);
+        bookMapping.setSubTitle(textFieldProperties);
+        bookMapping.setTitle(textFieldProperties);
         BaseMapping baseMapping = new BaseMapping(bookMapping);
         Gson gson = new GsonBuilder().create();
         return gson.toJson(baseMapping);

@@ -15,18 +15,4 @@ import org.springframework.stereotype.Service;
 @Service
 public class EsIndicesServiceImpl extends EsBaseService implements EsIndexService {
 
-    @Override
-    public CreateIndexResponse createIndex(CreateIndexRequest createIndexRequest) {
-        return clientCreateIndex(createIndexRequest);
-    }
-
-    @Override
-    public GetIndexResponse getIndex(GetIndexRequest getIndexRequest) {
-        return clientGetIndex(getIndexRequest);
-    }
-
-    @Override
-    public Boolean existIndex(GetIndexRequest getIndexRequest) {
-        return clientExistIndex(getIndexRequest);
-    }
 }

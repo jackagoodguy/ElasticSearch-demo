@@ -11,10 +11,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.TermVectorsRequest;
 import org.elasticsearch.client.core.TermVectorsResponse;
-import org.elasticsearch.client.indices.CreateIndexRequest;
-import org.elasticsearch.client.indices.CreateIndexResponse;
-import org.elasticsearch.client.indices.GetIndexRequest;
-import org.elasticsearch.client.indices.GetIndexResponse;
+import org.elasticsearch.client.indices.*;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +19,12 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 /**
+ * Es基本服务类
+ *
+ * <description>
+ * 处理基本的Es服务
+ * </description>
+ *
  * @Author: ShayLau
  * @Date: 2020/8/17 10:31
  */
@@ -33,7 +36,7 @@ public class EsBaseService {
     private RestHighLevelClient highLevelClient;
 
 
-    public GetResponse clientGetById(String indexName, String id) {
+    public GetResponse getById(String indexName, String id) {
         try {
             GetRequest getRequest = new GetRequest(indexName, id);
             return highLevelClient.get(getRequest, RequestOptions.DEFAULT);
@@ -53,7 +56,7 @@ public class EsBaseService {
      * @param excludes  排除的字段
      * @return
      */
-    public GetResponse clientGetPartFields(String indexName, String id, String[] includes, String[] excludes) {
+    public GetResponse getPartField(String indexName, String id, String[] includes, String[] excludes) {
         try {
             GetRequest getRequest = new GetRequest(indexName, id);
             FetchSourceContext fetchSourceContext = new FetchSourceContext(true, includes, excludes);
@@ -73,7 +76,7 @@ public class EsBaseService {
      * @param id                  id
      * @param getResponseListener 监听器
      */
-    public void clientGetAsync(String indexName, String id, GetResponseListener getResponseListener) {
+    public void getByListener(String indexName, String id, GetResponseListener getResponseListener) {
         GetRequest getRequest = new GetRequest(indexName, id);
         highLevelClient.getAsync(getRequest, RequestOptions.DEFAULT, getResponseListener);
     }
@@ -85,7 +88,7 @@ public class EsBaseService {
      * @param termVectorsRequest
      * @return
      */
-    public TermVectorsResponse clientGetTermVector(TermVectorsRequest termVectorsRequest) {
+    public TermVectorsResponse getTermVector(TermVectorsRequest termVectorsRequest) {
         try {
             highLevelClient.termvectors(termVectorsRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
@@ -102,7 +105,7 @@ public class EsBaseService {
      * @param getIndexRequest
      * @return
      */
-    public GetIndexResponse clientGetIndex(GetIndexRequest getIndexRequest) {
+    public GetIndexResponse getIndex(GetIndexRequest getIndexRequest) {
         try {
             return highLevelClient.indices().get(getIndexRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
@@ -118,7 +121,7 @@ public class EsBaseService {
      * @param createIndexRequest
      * @return
      */
-    public CreateIndexResponse clientCreateIndex(CreateIndexRequest createIndexRequest) {
+    public CreateIndexResponse createIndex(CreateIndexRequest createIndexRequest) {
         IndicesClient indicesClient = highLevelClient.indices();
         try {
             return indicesClient.create(createIndexRequest, RequestOptions.DEFAULT);
@@ -135,7 +138,7 @@ public class EsBaseService {
      * @param deleteIndexRequest
      * @return
      */
-    public AcknowledgedResponse clientDeleteIndex(DeleteIndexRequest deleteIndexRequest) {
+    public AcknowledgedResponse deleteIndex(DeleteIndexRequest deleteIndexRequest) {
         IndicesClient indicesClient = highLevelClient.indices();
         try {
             return indicesClient.delete(deleteIndexRequest, RequestOptions.DEFAULT);
@@ -152,7 +155,7 @@ public class EsBaseService {
      * @param getIndexRequest
      * @return
      */
-    public Boolean clientExistIndex(GetIndexRequest getIndexRequest) {
+    public Boolean existIndex(GetIndexRequest getIndexRequest) {
         IndicesClient indicesClient = highLevelClient.indices();
         try {
             return indicesClient.exists(getIndexRequest, RequestOptions.DEFAULT);
@@ -161,6 +164,24 @@ public class EsBaseService {
             log.info("exist index Exception：" + e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * 更新索引Mapping
+     *
+     * @param putMappingRequest
+     * @return
+     */
+    public boolean putIndexMapping(PutMappingRequest putMappingRequest) {
+        IndicesClient indicesClient = highLevelClient.indices();
+        try {
+            AcknowledgedResponse acknowledgedResponse = indicesClient.putMapping(putMappingRequest, RequestOptions.DEFAULT);
+            return acknowledgedResponse.isAcknowledged();
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.info("exist index Exception：" + e.getMessage());
+            return false;
+        }
     }
 
 
