@@ -11,6 +11,7 @@ import com.elasticsearch.demo.service.base.EsGetService;
 import com.elasticsearch.demo.service.base.EsIndexService;
 import com.elasticsearch.demo.service.base.EsTermVectorsService;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.get.GetResponse;
@@ -40,15 +41,20 @@ public class BookServiceImpl implements BookService {
     /**
      * 创建书本索引
      *
+     * @param mapping mapping配置
      * @return
      */
     @Override
-    public boolean createBookIndex() {
+    public boolean createBookIndex(String mapping) {
         GetIndexRequest getIndexRequest = new GetIndexRequest(Constant.DEFAULT_ES_INDEX_NAME);
         boolean existIndex = indexService.existIndex(getIndexRequest);
         if (!existIndex) {
             CreateIndexRequest createIndexRequest = new CreateIndexRequest(Constant.DEFAULT_ES_INDEX_NAME);
-            createIndexRequest.mapping(BookService.indexMapping(), XContentType.JSON);
+            if (StringUtils.isNotBlank(mapping)) {
+                createIndexRequest.mapping(mapping, XContentType.JSON);
+            } else {
+                createIndexRequest.mapping(BookService.defaultIndexMapping(), XContentType.JSON);
+            }
             CreateIndexResponse createIndexResponse = indexService.createIndex(createIndexRequest);
             return createIndexResponse.isAcknowledged();
         }

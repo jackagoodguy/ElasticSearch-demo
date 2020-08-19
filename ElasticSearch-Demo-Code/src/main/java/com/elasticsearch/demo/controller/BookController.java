@@ -24,11 +24,12 @@ public class BookController {
     /**
      * 创建书本索引
      *
+     * @param mapping mapping配置
      * @return
      */
     @PostMapping("/index")
-    public ResultBody createBookIndex() {
-        return ResultBody.success(bookService.createBookIndex());
+    public ResultBody createBookIndex(@RequestParam(required = false) String mapping) {
+        return ResultBody.success(bookService.createBookIndex(mapping));
     }
 
     /**

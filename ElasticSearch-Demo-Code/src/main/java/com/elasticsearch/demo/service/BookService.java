@@ -21,11 +21,11 @@ import org.elasticsearch.client.indices.GetIndexResponse;
 public interface BookService {
 
     /**
-     * 书本映射关系
+     * 默认书本映射关系
      *
      * @return 书本映射关系JSON字符串
      */
-    static String indexMapping() {
+    static String defaultIndexMapping() {
         BookMapping bookMapping = new BookMapping();
         //文本类型
         MappingFieldProperties textFieldProperties = new MappingFieldProperties(EsIndexFieldTypeEnum.TEXT.getType(), true);
@@ -44,9 +44,10 @@ public interface BookService {
     /**
      * 创建书本索引
      *
+     * @param mapping mapping配置
      * @return
      */
-    boolean createBookIndex();
+    boolean createBookIndex(String mapping);
 
     /**
      * 获取书本索引信息
