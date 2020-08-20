@@ -33,7 +33,6 @@
 ## 重要相关知识点
 
 - [**为什么索引的主分片数量在创建的时候需要明确？**](https://www.elastic.co/guide/cn/elasticsearch/guide/current/routing-value.html)
-- [**使用LogStash同步MySQL数据库到ElasticSearch配置说明**](https://www.yuque.com/sourlemon/java/nwdgwe)
 
 **<br />**
 <a name="8Zu9p"></a>
