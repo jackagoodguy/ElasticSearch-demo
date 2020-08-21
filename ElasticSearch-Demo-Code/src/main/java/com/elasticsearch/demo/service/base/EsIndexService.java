@@ -3,6 +3,7 @@ package com.elasticsearch.demo.service.base;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.client.indices.*;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
 
 /**
  * @Author: ShayLau
@@ -65,4 +66,11 @@ public interface EsIndexService {
     boolean indexAlias(String indices, String aliasName, IndicesAliasesRequest.AliasActions.Type type);
 
 
+    /**
+     * 改变索引
+     *
+     * @param oldIndexName 原索引名称
+     * @param newIndexName 新索引名称
+     */
+    BulkByScrollResponse reIndex(String oldIndexName, String newIndexName);
 }

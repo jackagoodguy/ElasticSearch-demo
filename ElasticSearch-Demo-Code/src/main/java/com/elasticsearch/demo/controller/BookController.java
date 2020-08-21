@@ -111,4 +111,22 @@ public class BookController {
         return ResultBody.success(bookService.bookIndexAlias(aliasName, IndicesAliasesRequest.AliasActions.Type.REMOVE));
     }
 
+    /**
+     * 复制索引信息
+     *
+     * <description>
+     * 索引受文件系统的限制。仅可能为小写字母，不能下划线开头,具体查看官网说明
+     * </description>
+     *
+     * @param oldIndexName 原索引名称
+     * @param newIndexName 新索引名称
+     * @return
+     */
+    @PostMapping("/reIndex")
+    public ResultBody reBookIndex(@RequestParam String oldIndexName, @RequestParam String newIndexName) {
+        bookService.reBookIndex(oldIndexName.toLowerCase(), newIndexName.toLowerCase());
+        return ResultBody.success();
+    }
+
+
 }

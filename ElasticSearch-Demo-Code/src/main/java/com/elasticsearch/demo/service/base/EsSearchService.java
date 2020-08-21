@@ -7,4 +7,5 @@ package com.elasticsearch.demo.service.base;
  * @Date: 2020/8/17 13:45
  */
 public interface EsSearchService {
+
 }

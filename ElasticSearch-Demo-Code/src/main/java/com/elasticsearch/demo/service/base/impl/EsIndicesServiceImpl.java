@@ -1,4 +1,4 @@
-package com.elasticsearch.demo.service.impl.base;
+package com.elasticsearch.demo.service.base.impl;
 
 import com.elasticsearch.demo.service.base.EsBaseService;
 import com.elasticsearch.demo.service.base.EsIndexService;
@@ -9,6 +9,8 @@ import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.IndicesClient;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.indices.*;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.ReindexRequest;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -105,5 +107,17 @@ public class EsIndicesServiceImpl extends EsBaseService implements EsIndexServic
             e.printStackTrace();
         }
         return false;
+    }
+
+    @Override
+    public BulkByScrollResponse reIndex(String oldIndexName, String newIndexName) {
+        ReindexRequest reindexRequest = new ReindexRequest();
+        reindexRequest.setSourceIndices(oldIndexName).setDestIndex(newIndexName);
+        try {
+            return highLevelClient.reindex(reindexRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

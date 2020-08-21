@@ -19,6 +19,7 @@ import org.elasticsearch.client.core.TermVectorsRequest;
 import org.elasticsearch.client.core.TermVectorsResponse;
 import org.elasticsearch.client.indices.*;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -155,5 +156,12 @@ public class BookServiceImpl implements BookService {
         TermVectorsRequest termVectorsRequest = new TermVectorsRequest(Constant.DEFAULT_ES_INDEX_NAME, id);
         ///词向量相关查询配置省略...
         return termVectorsService.getTermVector(termVectorsRequest);
+    }
+
+    @Override
+    public void reBookIndex(String oldIndexName, String newIndexName) {
+        BulkByScrollResponse response = indexService.reIndex(oldIndexName, newIndexName);
+
+        System.out.println(response.getStatus());
     }
 }

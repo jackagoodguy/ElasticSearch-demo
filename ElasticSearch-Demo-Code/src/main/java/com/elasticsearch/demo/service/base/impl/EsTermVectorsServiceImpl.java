@@ -1,4 +1,4 @@
-package com.elasticsearch.demo.service.impl.base;
+package com.elasticsearch.demo.service.base.impl;
 
 import com.elasticsearch.demo.service.base.EsBaseService;
 import com.elasticsearch.demo.service.base.EsTermVectorsService;

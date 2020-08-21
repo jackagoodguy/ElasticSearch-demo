@@ -102,4 +102,12 @@ public interface BookService {
      * @return
      */
     TermVectorsResponse bookTermVector(String id);
+
+    /**
+     * 赋值索引
+     *
+     * @param oldIndexName 原索引名称
+     * @param newIndexName 新索引名称
+     */
+    void reBookIndex(String oldIndexName, String newIndexName);
 }
