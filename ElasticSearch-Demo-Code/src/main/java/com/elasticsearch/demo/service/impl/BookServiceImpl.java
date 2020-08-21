@@ -40,6 +40,22 @@ public class BookServiceImpl implements BookService {
     private EsTermVectorsService termVectorsService;
 
     /**
+     * 书本索引名称
+     */
+    private String bookIndexName = Constant.DEFAULT_ES_INDEX_NAME;
+
+    /**
+     * 设置书本索引名称
+     *
+     * @param bookIndexName
+     */
+    private void setBookIndexName(String bookIndexName) {
+        if (StringUtils.isNotBlank(bookIndexName)) {
+            this.bookIndexName = bookIndexName;
+        }
+    }
+
+    /**
      * 创建书本索引
      *
      * @param mapping mapping配置
@@ -69,7 +85,7 @@ public class BookServiceImpl implements BookService {
      */
     @Override
     public GetIndexResponse getBookIndex() {
-        GetIndexRequest getIndexRequest = new GetIndexRequest(Constant.DEFAULT_ES_INDEX_NAME);
+        GetIndexRequest getIndexRequest = new GetIndexRequest(bookIndexName);
         GetIndexResponse getIndexResponse = indexService.getIndex(getIndexRequest);
         return getIndexResponse;
     }
@@ -82,7 +98,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public boolean deleteBookIndex() {
         DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest();
-        deleteIndexRequest.indices(Constant.DEFAULT_ES_INDEX_NAME);
+        deleteIndexRequest.indices(bookIndexName);
         return indexService.deleteIndex(deleteIndexRequest);
     }
 
@@ -94,19 +110,21 @@ public class BookServiceImpl implements BookService {
      */
     @Override
     public GetResponse getId(String id) {
-        return getService.getById(Constant.DEFAULT_ES_INDEX_NAME, id);
+        return getService.getById(bookIndexName, id);
     }
 
     /**
      * 书本索引别名处理
      *
-     * @param aliasName 别名名称
-     * @param type      别名操作类型
+     * @param bookIndexName 书本索引名称
+     * @param aliasName     别名名称
+     * @param type          别名操作类型
      * @return
      */
     @Override
-    public boolean bookIndexAlias(String aliasName, IndicesAliasesRequest.AliasActions.Type type) {
-        return indexService.indexAlias(Constant.DEFAULT_ES_INDEX_NAME, aliasName, type);
+    public boolean bookIndexAlias(String bookIndexName, String aliasName, IndicesAliasesRequest.AliasActions.Type type) {
+        setBookIndexName(bookIndexName);
+        return indexService.indexAlias(this.bookIndexName, aliasName, type);
     }
 
 
@@ -128,7 +146,7 @@ public class BookServiceImpl implements BookService {
      */
     @Override
     public boolean putIndexMapping() {
-        PutMappingRequest putMappingRequest = new PutMappingRequest(Constant.DEFAULT_ES_INDEX_NAME);
+        PutMappingRequest putMappingRequest = new PutMappingRequest(bookIndexName);
         String mappingSource;
 
         ///设置index的mapping，该处只作为测试接口使用
@@ -153,15 +171,15 @@ public class BookServiceImpl implements BookService {
      */
     @Override
     public TermVectorsResponse bookTermVector(String id) {
-        TermVectorsRequest termVectorsRequest = new TermVectorsRequest(Constant.DEFAULT_ES_INDEX_NAME, id);
+        TermVectorsRequest termVectorsRequest = new TermVectorsRequest(bookIndexName, id);
         ///词向量相关查询配置省略...
         return termVectorsService.getTermVector(termVectorsRequest);
     }
 
     @Override
     public void reBookIndex(String oldIndexName, String newIndexName) {
-        BulkByScrollResponse response = indexService.reIndex(oldIndexName, newIndexName);
-
+        setBookIndexName(oldIndexName);
+        BulkByScrollResponse response = indexService.reIndex(bookIndexName, newIndexName);
         System.out.println(response.getStatus());
     }
 }

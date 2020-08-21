@@ -21,6 +21,7 @@ public class BookController {
     @Autowired
     private BookService bookService;
 
+
     /**
      * 创建书本索引
      *
@@ -91,24 +92,26 @@ public class BookController {
     /**
      * 添加书本索引别名
      *
-     * @param aliasName
+     * @param bookIndexName 书本索引名称
+     * @param aliasName     别名
      * @return
      */
     @PostMapping("/index/alias")
-    public ResultBody addBookIndexAlias(@RequestParam String aliasName) {
-        return ResultBody.success(bookService.bookIndexAlias(aliasName, IndicesAliasesRequest.AliasActions.Type.ADD));
+    public ResultBody addBookIndexAlias(@RequestParam(required = false) String bookIndexName, @RequestParam String aliasName) {
+        return ResultBody.success(bookService.bookIndexAlias(bookIndexName, aliasName, IndicesAliasesRequest.AliasActions.Type.ADD));
     }
 
 
     /**
      * 删除书本索引别名
      *
-     * @param aliasName
+     * @param bookIndexName 书本索引名称
+     * @param aliasName     别名
      * @return
      */
     @DeleteMapping("/index/alias")
-    public ResultBody removeBookIndexAlias(@RequestParam String aliasName) {
-        return ResultBody.success(bookService.bookIndexAlias(aliasName, IndicesAliasesRequest.AliasActions.Type.REMOVE));
+    public ResultBody removeBookIndexAlias(@RequestParam(required = false) String bookIndexName, @RequestParam String aliasName) {
+        return ResultBody.success(bookService.bookIndexAlias(bookIndexName, aliasName, IndicesAliasesRequest.AliasActions.Type.REMOVE));
     }
 
     /**

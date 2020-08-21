@@ -75,11 +75,12 @@ public interface BookService {
     /**
      * 书本索引别名处理
      *
-     * @param aliasName 别名名称
-     * @param type      别名操作类型
+     * @param bookIndexName 书本索引名称
+     * @param aliasName     别名名称
+     * @param type          别名操作类型
      * @return
      */
-    boolean bookIndexAlias(String aliasName, IndicesAliasesRequest.AliasActions.Type type);
+    boolean bookIndexAlias(String bookIndexName, String aliasName, IndicesAliasesRequest.AliasActions.Type type);
 
 
     /**
