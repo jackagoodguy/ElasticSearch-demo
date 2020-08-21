@@ -63,10 +63,10 @@ public class BookServiceImpl implements BookService {
      */
     @Override
     public boolean createBookIndex(String mapping) {
-        GetIndexRequest getIndexRequest = new GetIndexRequest(Constant.DEFAULT_ES_INDEX_NAME);
+        GetIndexRequest getIndexRequest = new GetIndexRequest(bookIndexName);
         boolean existIndex = indexService.existIndex(getIndexRequest);
         if (!existIndex) {
-            CreateIndexRequest createIndexRequest = new CreateIndexRequest(Constant.DEFAULT_ES_INDEX_NAME);
+            CreateIndexRequest createIndexRequest = new CreateIndexRequest(bookIndexName);
             if (StringUtils.isNotBlank(mapping)) {
                 createIndexRequest.mapping(mapping, XContentType.JSON);
             } else {
