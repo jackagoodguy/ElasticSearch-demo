@@ -10,10 +10,7 @@ import com.elasticsearch.demo.model.indexmapping.BaseMapping;
 import com.elasticsearch.demo.model.indexmapping.BookMapping;
 import com.elasticsearch.demo.model.indexmapping.MappingFieldProperties;
 import com.elasticsearch.demo.service.BookService;
-import com.elasticsearch.demo.service.base.EsBulkService;
-import com.elasticsearch.demo.service.base.EsGetService;
-import com.elasticsearch.demo.service.base.EsIndexService;
-import com.elasticsearch.demo.service.base.EsTermVectorsService;
+import com.elasticsearch.demo.service.base.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -23,15 +20,26 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.client.core.TermVectorsRequest;
 import org.elasticsearch.client.core.TermVectorsResponse;
 import org.elasticsearch.client.indices.*;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.search.MatchQuery;
+import org.elasticsearch.search.Scroll;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 书本服务
@@ -50,6 +58,10 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
     private EsTermVectorsService termVectorsService;
     @Autowired
     private EsBulkService bulkService;
+    @Autowired
+    private EsSearchScrollService searchScrollService;
+    @Autowired
+    private EsSearchService searchService;
 
     /**
      * 索引名称
@@ -204,5 +216,69 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
                 .source(gson.toJson(book), XContentType.JSON)));
         //异步执行数据批量导入
         bulkService.bulkAsyncOperation(bulkRequest);
+    }
+
+
+    @Override
+    public List<Book> bookScrollSearch() {
+        SearchScrollRequest searchScrollRequest = new SearchScrollRequest();
+        List<String> result = new ArrayList<>();
+        result = scroll(searchScrollRequest, result);
+        Gson gson = new GsonBuilder().create();
+        return result.stream().map(str -> gson.fromJson(str, Book.class)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Book> bookSearch() {
+        SearchRequest searchRequest = new SearchRequest(defaultBookIndex);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.size(1000);
+        searchRequest.source(searchSourceBuilder);
+
+        List<String> result = new ArrayList<>();
+        Gson gson = new GsonBuilder().create();
+        return result.stream().map(str -> gson.fromJson(str, Book.class)).collect(Collectors.toList());
+    }
+
+    /**
+     * 卷轴查询
+     *
+     * @param searchRequest
+     * @param bookList
+     * @return
+     */
+    private List<String> search(SearchRequest searchRequest, List<String> bookList) {
+        SearchResponse searchResponse = searchService.search(searchRequest);
+        SearchHit[] searchHits = searchResponse.getHits().getHits();
+        if (searchHits.length > 0) {
+            Arrays.asList(searchHits).stream().forEach(searchHit -> bookList.add(searchHit.getSourceAsString()));
+            String scrollId = searchResponse.getScrollId();
+            Scroll scroll=new Scroll(TimeValue.ZERO);
+            searchRequest.scroll(scrollId);
+            return search(searchRequest, bookList);
+        } else {
+            return bookList;
+        }
+    }
+
+
+    /**
+     * 卷轴查询
+     *
+     * @param searchScrollRequest
+     * @param bookList
+     * @return
+     */
+    private List<String> scroll(SearchScrollRequest searchScrollRequest, List<String> bookList) {
+        SearchResponse searchResponse = searchScrollService.searchScroll(searchScrollRequest);
+        SearchHit[] searchHits = searchResponse.getHits().getHits();
+        if (searchHits.length > 0) {
+            Arrays.asList(searchHits).stream().forEach(searchHit -> bookList.add(searchHit.getSourceAsString()));
+            String scrollId = searchResponse.getScrollId();
+            searchScrollRequest.scrollId(scrollId);
+            return scroll(searchScrollRequest, bookList);
+        } else {
+            return bookList;
+        }
     }
 }

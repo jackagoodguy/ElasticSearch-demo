@@ -2,6 +2,7 @@ package com.elasticsearch.demo.service;
 
 
 import com.elasticsearch.demo.enums.EsIndexFieldTypeEnum;
+import com.elasticsearch.demo.model.Book;
 import com.elasticsearch.demo.model.indexmapping.BaseMapping;
 import com.elasticsearch.demo.model.indexmapping.BookMapping;
 import com.elasticsearch.demo.model.indexmapping.MappingFieldProperties;
@@ -11,6 +12,9 @@ import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.core.TermVectorsResponse;
 import org.elasticsearch.client.indices.GetIndexResponse;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 书本服务
@@ -118,4 +122,18 @@ public interface BookService {
      * @param indexName 索引名称
      */
     void scanDbToEs(String indexName);
+
+    /**
+     * 卷轴查询书本
+     *
+     * @return
+     */
+    List<Book> bookScrollSearch();
+
+    /**
+     * 书本查询
+     *
+     * @return
+     */
+    List<Book> bookSearch();
 }
