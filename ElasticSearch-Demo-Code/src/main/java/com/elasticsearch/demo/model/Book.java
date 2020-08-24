@@ -1,5 +1,6 @@
 package com.elasticsearch.demo.model;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -8,6 +9,7 @@ import java.io.Serializable;
  * @Author: ShayLau
  * @Date: 2020/8/18 14:17
  */
+@TableName("book")
 @Data
 public class Book implements Serializable {
 

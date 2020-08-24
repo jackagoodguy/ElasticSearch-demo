@@ -131,5 +131,16 @@ public class BookController {
         return ResultBody.success();
     }
 
+    /**
+     * 扫描书本表数据到指定Es索引
+     *
+     * @param bookIndexName 书本索引名称
+     * @return
+     */
+    @PostMapping("/scan")
+    public ResultBody scanDbToEs(@RequestParam(required = false) String bookIndexName) {
+        bookService.scanDbToEs(bookIndexName);
+        return ResultBody.success();
+    }
 
 }

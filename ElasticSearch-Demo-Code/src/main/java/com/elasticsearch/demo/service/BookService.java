@@ -111,4 +111,11 @@ public interface BookService {
      * @param newIndexName 新索引名称
      */
     void reBookIndex(String oldIndexName, String newIndexName);
+
+    /**
+     * 扫描Mysql数据到Es
+     *
+     * @param indexName 索引名称
+     */
+    void scanDbToEs(String indexName);
 }

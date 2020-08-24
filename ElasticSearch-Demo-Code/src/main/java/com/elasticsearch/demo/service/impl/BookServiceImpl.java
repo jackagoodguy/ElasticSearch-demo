@@ -1,20 +1,28 @@
 package com.elasticsearch.demo.service.impl;
 
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.elasticsearch.demo.common.Constant;
 import com.elasticsearch.demo.enums.EsIndexFieldTypeEnum;
+import com.elasticsearch.demo.mapper.BookMapper;
+import com.elasticsearch.demo.model.Book;
 import com.elasticsearch.demo.model.indexmapping.BaseMapping;
 import com.elasticsearch.demo.model.indexmapping.BookMapping;
 import com.elasticsearch.demo.model.indexmapping.MappingFieldProperties;
 import com.elasticsearch.demo.service.BookService;
+import com.elasticsearch.demo.service.base.EsBulkService;
 import com.elasticsearch.demo.service.base.EsGetService;
 import com.elasticsearch.demo.service.base.EsIndexService;
 import com.elasticsearch.demo.service.base.EsTermVectorsService;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.core.TermVectorsRequest;
 import org.elasticsearch.client.core.TermVectorsResponse;
 import org.elasticsearch.client.indices.*;
@@ -23,6 +31,8 @@ import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * 书本服务
  *
@@ -30,7 +40,7 @@ import org.springframework.stereotype.Service;
  * @Date: 2020/8/18 17:09
  */
 @Service
-public class BookServiceImpl implements BookService {
+public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements BookService {
 
     @Autowired
     private EsIndexService indexService;
@@ -38,21 +48,21 @@ public class BookServiceImpl implements BookService {
     private EsGetService getService;
     @Autowired
     private EsTermVectorsService termVectorsService;
+    @Autowired
+    private EsBulkService bulkService;
 
     /**
-     * 书本索引名称
+     * 索引名称
      */
-    private String bookIndexName = Constant.DEFAULT_ES_INDEX_NAME;
+    private final String defaultBookIndex = Constant.DEFAULT_ES_INDEX_NAME;
 
     /**
      * 设置书本索引名称
      *
-     * @param bookIndexName
+     * @param indexName 给定索引名称
      */
-    private void setBookIndexName(String bookIndexName) {
-        if (StringUtils.isNotBlank(bookIndexName)) {
-            this.bookIndexName = bookIndexName;
-        }
+    private String getBookIndexName(String indexName) {
+        return StringUtils.isNotBlank(indexName) ? indexName : defaultBookIndex;
     }
 
     /**
@@ -63,10 +73,10 @@ public class BookServiceImpl implements BookService {
      */
     @Override
     public boolean createBookIndex(String mapping) {
-        GetIndexRequest getIndexRequest = new GetIndexRequest(bookIndexName);
+        GetIndexRequest getIndexRequest = new GetIndexRequest(defaultBookIndex);
         boolean existIndex = indexService.existIndex(getIndexRequest);
         if (!existIndex) {
-            CreateIndexRequest createIndexRequest = new CreateIndexRequest(bookIndexName);
+            CreateIndexRequest createIndexRequest = new CreateIndexRequest(defaultBookIndex);
             if (StringUtils.isNotBlank(mapping)) {
                 createIndexRequest.mapping(mapping, XContentType.JSON);
             } else {
@@ -85,7 +95,7 @@ public class BookServiceImpl implements BookService {
      */
     @Override
     public GetIndexResponse getBookIndex() {
-        GetIndexRequest getIndexRequest = new GetIndexRequest(bookIndexName);
+        GetIndexRequest getIndexRequest = new GetIndexRequest(defaultBookIndex);
         GetIndexResponse getIndexResponse = indexService.getIndex(getIndexRequest);
         return getIndexResponse;
     }
@@ -98,7 +108,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public boolean deleteBookIndex() {
         DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest();
-        deleteIndexRequest.indices(bookIndexName);
+        deleteIndexRequest.indices(defaultBookIndex);
         return indexService.deleteIndex(deleteIndexRequest);
     }
 
@@ -110,7 +120,7 @@ public class BookServiceImpl implements BookService {
      */
     @Override
     public GetResponse getId(String id) {
-        return getService.getById(bookIndexName, id);
+        return getService.getById(defaultBookIndex, id);
     }
 
     /**
@@ -123,8 +133,7 @@ public class BookServiceImpl implements BookService {
      */
     @Override
     public boolean bookIndexAlias(String bookIndexName, String aliasName, IndicesAliasesRequest.AliasActions.Type type) {
-        setBookIndexName(bookIndexName);
-        return indexService.indexAlias(this.bookIndexName, aliasName, type);
+        return indexService.indexAlias(getBookIndexName(bookIndexName), aliasName, type);
     }
 
 
@@ -146,7 +155,7 @@ public class BookServiceImpl implements BookService {
      */
     @Override
     public boolean putIndexMapping() {
-        PutMappingRequest putMappingRequest = new PutMappingRequest(bookIndexName);
+        PutMappingRequest putMappingRequest = new PutMappingRequest(defaultBookIndex);
         String mappingSource;
 
         ///设置index的mapping，该处只作为测试接口使用
@@ -171,15 +180,29 @@ public class BookServiceImpl implements BookService {
      */
     @Override
     public TermVectorsResponse bookTermVector(String id) {
-        TermVectorsRequest termVectorsRequest = new TermVectorsRequest(bookIndexName, id);
+        TermVectorsRequest termVectorsRequest = new TermVectorsRequest(defaultBookIndex, id);
         ///词向量相关查询配置省略...
         return termVectorsService.getTermVector(termVectorsRequest);
     }
 
     @Override
     public void reBookIndex(String oldIndexName, String newIndexName) {
-        setBookIndexName(oldIndexName);
-        BulkByScrollResponse response = indexService.reIndex(bookIndexName, newIndexName);
+        BulkByScrollResponse response = indexService.reIndex(getBookIndexName(oldIndexName), newIndexName);
         System.out.println(response.getStatus());
+    }
+
+    @Override
+    public void scanDbToEs(String indexName) {
+        List<Book> books = list();
+        //书本索引名称
+        String bookIndexName = getBookIndexName(indexName);
+        //使用批量ES操作，添加MySQL数据导入Es
+        BulkRequest bulkRequest = new BulkRequest();
+        //使用GSON,转换Object对象为Json字符串
+        Gson gson = new GsonBuilder().create();
+        books.stream().forEach(book -> bulkRequest.add(new IndexRequest(bookIndexName).id(book.getIsbn())
+                .source(gson.toJson(book), XContentType.JSON)));
+        //异步执行数据批量导入
+        bulkService.bulkAsyncOperation(bulkRequest);
     }
 }
