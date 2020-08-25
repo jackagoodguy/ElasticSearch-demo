@@ -6,6 +6,7 @@ import com.elasticsearch.demo.model.Book;
 import com.elasticsearch.demo.model.indexmapping.BaseMapping;
 import com.elasticsearch.demo.model.indexmapping.BookMapping;
 import com.elasticsearch.demo.model.indexmapping.MappingFieldProperties;
+import com.elasticsearch.demo.query.QuerySourceBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
@@ -136,4 +137,12 @@ public interface BookService {
      * @return
      */
     List<Book> bookSearch();
+
+    /**
+     * 条件查询
+     *
+     * @param querySourceBuilder
+     * @return
+     */
+    List<Book> conditionSearch(QuerySourceBuilder querySourceBuilder);
 }

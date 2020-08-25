@@ -22,15 +22,6 @@ import java.io.IOException;
 @Slf4j
 public class EsSearchServiceImpl extends EsBaseService implements EsSearchService {
 
-    public void search() {
-
-        String indexName = Constant.DEFAULT_ES_INDEX_NAME;
-        SearchRequest searchRequest = new SearchRequest(indexName);
-
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchRequest.routing();
-    }
-
     /**
      * 查询
      *

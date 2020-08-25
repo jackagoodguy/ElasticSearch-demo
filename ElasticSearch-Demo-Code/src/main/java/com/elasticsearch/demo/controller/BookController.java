@@ -1,6 +1,7 @@
 package com.elasticsearch.demo.controller;
 
 import com.elasticsearch.demo.common.ResultBody;
+import com.elasticsearch.demo.query.QuerySourceBuilder;
 import com.elasticsearch.demo.service.BookService;
 import com.google.gson.Gson;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
@@ -143,4 +144,26 @@ public class BookController {
         return ResultBody.success();
     }
 
+
+    /**
+     * 查询书本
+     *
+     * @return
+     */
+    @GetMapping("/search")
+    public ResultBody searchBook() {
+        return ResultBody.success(bookService.bookSearch());
+    }
+
+    /**
+     * 条件查询
+     *
+     * @return
+     */
+    @GetMapping("/search/condition")
+    public ResultBody conditionSearch() {
+        QuerySourceBuilder querySourceBuilder = new QuerySourceBuilder();
+        querySourceBuilder.matchQuery("author", "John Burt Foster Jr.");
+        return ResultBody.success(bookService.conditionSearch(querySourceBuilder));
+    }
 }

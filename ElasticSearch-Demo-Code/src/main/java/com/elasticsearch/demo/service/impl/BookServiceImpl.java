@@ -9,6 +9,7 @@ import com.elasticsearch.demo.model.Book;
 import com.elasticsearch.demo.model.indexmapping.BaseMapping;
 import com.elasticsearch.demo.model.indexmapping.BookMapping;
 import com.elasticsearch.demo.model.indexmapping.MappingFieldProperties;
+import com.elasticsearch.demo.query.QuerySourceBuilder;
 import com.elasticsearch.demo.service.BookService;
 import com.elasticsearch.demo.service.base.*;
 import com.google.gson.Gson;
@@ -231,14 +232,26 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
     @Override
     public List<Book> bookSearch() {
         SearchRequest searchRequest = new SearchRequest(defaultBookIndex);
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.size(1000);
-        searchRequest.source(searchSourceBuilder);
+        QuerySourceBuilder querySourceBuilder = new QuerySourceBuilder();
+        querySourceBuilder.size(1000);
+        return getBooks(querySourceBuilder, searchRequest);
+    }
 
+
+    @Override
+    public List<Book> conditionSearch(QuerySourceBuilder querySourceBuilder) {
+        SearchRequest searchRequest = new SearchRequest(defaultBookIndex);
+        return getBooks(querySourceBuilder, searchRequest);
+    }
+
+    private List<Book> getBooks(QuerySourceBuilder querySourceBuilder, SearchRequest searchRequest) {
+        searchRequest.source(querySourceBuilder.build());
         List<String> result = new ArrayList<>();
+        search(searchRequest, result);
         Gson gson = new GsonBuilder().create();
         return result.stream().map(str -> gson.fromJson(str, Book.class)).collect(Collectors.toList());
     }
+
 
     /**
      * 卷轴查询
@@ -252,15 +265,11 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         SearchHit[] searchHits = searchResponse.getHits().getHits();
         if (searchHits.length > 0) {
             Arrays.asList(searchHits).stream().forEach(searchHit -> bookList.add(searchHit.getSourceAsString()));
-            String scrollId = searchResponse.getScrollId();
-            Scroll scroll=new Scroll(TimeValue.ZERO);
-            searchRequest.scroll(scrollId);
-            return search(searchRequest, bookList);
-        } else {
             return bookList;
+        } else {
+            return null;
         }
     }
-
 
     /**
      * 卷轴查询
