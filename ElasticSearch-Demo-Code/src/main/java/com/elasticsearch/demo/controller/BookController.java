@@ -156,6 +156,17 @@ public class BookController {
     }
 
     /**
+     * 使用游标查询书本
+     *
+     * @param scrollId 游标id
+     * @return
+     */
+    @GetMapping("/search/scroll")
+    public ResultBody scrollSearchBook(@RequestParam(required = false) String scrollId) {
+        return ResultBody.success(bookService.bookScrollSearch(scrollId));
+    }
+
+    /**
      * 条件查询
      *
      * @return

@@ -3,6 +3,7 @@ package com.elasticsearch.demo.service;
 
 import com.elasticsearch.demo.enums.EsIndexFieldTypeEnum;
 import com.elasticsearch.demo.model.Book;
+import com.elasticsearch.demo.model.BookScrollSearchBO;
 import com.elasticsearch.demo.model.indexmapping.BaseMapping;
 import com.elasticsearch.demo.model.indexmapping.BookMapping;
 import com.elasticsearch.demo.model.indexmapping.MappingFieldProperties;
@@ -125,11 +126,12 @@ public interface BookService {
     void scanDbToEs(String indexName);
 
     /**
-     * 卷轴查询书本
+     * 使用游标Scroll查询书本
      *
+     * @param scrollId scrollId
      * @return
      */
-    List<Book> bookScrollSearch();
+    BookScrollSearchBO bookScrollSearch(String scrollId);
 
     /**
      * 书本查询

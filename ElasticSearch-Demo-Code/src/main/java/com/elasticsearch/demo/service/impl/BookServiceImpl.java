@@ -6,6 +6,7 @@ import com.elasticsearch.demo.common.Constant;
 import com.elasticsearch.demo.enums.EsIndexFieldTypeEnum;
 import com.elasticsearch.demo.mapper.BookMapper;
 import com.elasticsearch.demo.model.Book;
+import com.elasticsearch.demo.model.BookScrollSearchBO;
 import com.elasticsearch.demo.model.indexmapping.BaseMapping;
 import com.elasticsearch.demo.model.indexmapping.BookMapping;
 import com.elasticsearch.demo.model.indexmapping.MappingFieldProperties;
@@ -222,14 +223,34 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         bulkService.bulkAsyncOperation(bulkRequest);
     }
 
-
+    /**
+     * 使用游标Scroll查询书本
+     *
+     * @param scrollId scrollId
+     * @return
+     */
     @Override
-    public List<Book> bookScrollSearch() {
-        SearchScrollRequest searchScrollRequest = new SearchScrollRequest();
+    public BookScrollSearchBO bookScrollSearch(String scrollId) {
+        BookScrollSearchBO bookScrollSearchBO = new BookScrollSearchBO();
+        SearchResponse searchResponse;
+        if (StringUtils.isNotBlank(scrollId)) {
+            SearchScrollRequest searchScrollRequest = new SearchScrollRequest(scrollId);
+            searchScrollRequest.scroll(TimeValue.timeValueMillis(10));
+            searchResponse = searchService.scrollSearch(searchScrollRequest);
+        } else {
+            SearchRequest searchRequest = new SearchRequest(defaultBookIndex);
+            searchRequest.scroll(new Scroll(TimeValue.timeValueMillis(10)));
+            searchResponse = searchService.search(searchRequest);
+        }
         List<String> result = new ArrayList<>();
-        result = scroll(searchScrollRequest, result);
+        bookScrollSearchBO.setScrollId(searchResponse.getScrollId());
+        SearchHit[] searchHits = searchResponse.getHits().getHits();
+        if (searchHits.length > 0) {
+            Arrays.asList(searchHits).stream().forEach(searchHit -> result.add(searchHit.getSourceAsString()));
+        }
         Gson gson = new GsonBuilder().create();
-        return result.stream().map(str -> gson.fromJson(str, Book.class)).collect(Collectors.toList());
+        bookScrollSearchBO.setBookList(result.stream().map(str -> gson.fromJson(str, Book.class)).collect(Collectors.toList()));
+        return bookScrollSearchBO;
     }
 
     @Override
@@ -250,49 +271,15 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
     private List<Book> getBooks(QuerySourceBuilder querySourceBuilder, SearchRequest searchRequest) {
         searchRequest.source(querySourceBuilder.build());
         List<String> result = new ArrayList<>();
-        search(searchRequest, result);
+        SearchResponse searchResponse = searchService.search(searchRequest);
+        SearchHit[] searchHits = searchResponse.getHits().getHits();
+        if (searchHits.length > 0) {
+            Arrays.asList(searchHits).stream().forEach(searchHit -> result.add(searchHit.getSourceAsString()));
+        }
         Gson gson = new GsonBuilder().create();
         return result.stream().map(str -> gson.fromJson(str, Book.class)).collect(Collectors.toList());
     }
 
-
-    /**
-     * 卷轴查询
-     *
-     * @param searchRequest
-     * @param bookList
-     * @return
-     */
-    private List<String> search(SearchRequest searchRequest, List<String> bookList) {
-        SearchResponse searchResponse = searchService.search(searchRequest);
-        SearchHit[] searchHits = searchResponse.getHits().getHits();
-        if (searchHits.length > 0) {
-            Arrays.asList(searchHits).stream().forEach(searchHit -> bookList.add(searchHit.getSourceAsString()));
-            return bookList;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * 卷轴查询
-     *
-     * @param searchScrollRequest
-     * @param bookList
-     * @return
-     */
-    private List<String> scroll(SearchScrollRequest searchScrollRequest, List<String> bookList) {
-        SearchResponse searchResponse = searchScrollService.searchScroll(searchScrollRequest);
-        SearchHit[] searchHits = searchResponse.getHits().getHits();
-        if (searchHits.length > 0) {
-            Arrays.asList(searchHits).stream().forEach(searchHit -> bookList.add(searchHit.getSourceAsString()));
-            String scrollId = searchResponse.getScrollId();
-            searchScrollRequest.scrollId(scrollId);
-            return scroll(searchScrollRequest, bookList);
-        } else {
-            return bookList;
-        }
-    }
 
     @Override
     public List<String> fieldSuggestSearch(String fieldName, String fieldValue) {
