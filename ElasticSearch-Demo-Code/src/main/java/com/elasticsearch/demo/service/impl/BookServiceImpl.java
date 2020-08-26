@@ -28,6 +28,7 @@ import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.client.core.TermVectorsRequest;
 import org.elasticsearch.client.core.TermVectorsResponse;
 import org.elasticsearch.client.indices.*;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.MatchQueryBuilder;
@@ -36,6 +37,8 @@ import org.elasticsearch.index.search.MatchQuery;
 import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.suggest.term.TermSuggestion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -289,5 +292,17 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         } else {
             return bookList;
         }
+    }
+
+    @Override
+    public List<String> fieldSuggestSearch(String fieldName, String fieldValue) {
+        SearchRequest searchRequest = new SearchRequest(defaultBookIndex);
+        QuerySourceBuilder querySourceBuilder = new QuerySourceBuilder();
+        querySourceBuilder.fieldSuggest(fieldName, fieldValue);
+        searchRequest.source(querySourceBuilder.build());
+        SearchResponse searchResponse = searchService.search(searchRequest);
+        Suggest suggestions = searchResponse.getSuggest();
+        TermSuggestion termSuggestion = suggestions.getSuggestion(fieldName);
+        return termSuggestion.getEntries().stream().map(Suggest.Suggestion.Entry::getText).map(Text::toString).collect(Collectors.toList());
     }
 }

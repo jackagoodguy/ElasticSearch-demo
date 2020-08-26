@@ -166,4 +166,17 @@ public class BookController {
         querySourceBuilder.matchQuery("author", "John Burt Foster Jr.");
         return ResultBody.success(bookService.conditionSearch(querySourceBuilder));
     }
+
+
+    /**
+     * 字段内容建议查询
+     *
+     * @return
+     */
+    @PostMapping("/field/suggest")
+    public ResultBody fieldSuggest(String fieldName, String fieldValue) {
+        return ResultBody.success(bookService.fieldSuggestSearch(fieldName, fieldValue));
+    }
+
+
 }

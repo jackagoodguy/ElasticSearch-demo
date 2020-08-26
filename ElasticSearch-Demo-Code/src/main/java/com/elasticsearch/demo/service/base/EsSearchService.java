@@ -12,7 +12,6 @@ import org.elasticsearch.action.search.SearchResponse;
 public interface EsSearchService {
 
 
-
     /**
      * 查询
      *

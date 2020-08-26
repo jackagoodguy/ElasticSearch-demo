@@ -145,4 +145,13 @@ public interface BookService {
      * @return
      */
     List<Book> conditionSearch(QuerySourceBuilder querySourceBuilder);
+
+    /**
+     * 书本标题建议查询
+     *
+     * @param fieldName  字段名称
+     * @param fieldValue 字段内容
+     * @return
+     */
+    List<String> fieldSuggestSearch(String fieldName, String fieldValue);
 }
