@@ -71,6 +71,7 @@ public interface EsIndexService {
      *
      * @param oldIndexName 原索引名称
      * @param newIndexName 新索引名称
+     * @return
      */
     BulkByScrollResponse reIndex(String oldIndexName, String newIndexName);
 }

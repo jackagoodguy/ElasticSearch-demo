@@ -5,7 +5,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.*;
-import org.elasticsearch.search.suggest.Suggest;
 import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.search.suggest.SuggestBuilders;
 import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
@@ -20,11 +19,11 @@ import java.util.Optional;
  * @Author: ShayLau
  * @Date: 2020/8/25 13:31
  */
-public class QuerySourceBuilder {
+public class QuerySource {
 
     private SearchSourceBuilder searchSourceBuilder;
 
-    public QuerySourceBuilder() {
+    public QuerySource() {
         searchSourceBuilder = new SearchSourceBuilder();
     }
 
@@ -44,7 +43,7 @@ public class QuerySourceBuilder {
      * @param size 数据量
      * @return
      */
-    public QuerySourceBuilder size(int size) {
+    public QuerySource size(int size) {
         searchSourceBuilder.size(size);
         return this;
     }
@@ -56,7 +55,7 @@ public class QuerySourceBuilder {
      * @param offset 偏移量
      * @return
      */
-    public QuerySourceBuilder offset(int offset) {
+    public QuerySource offset(int offset) {
         searchSourceBuilder.from(offset);
         return this;
     }
@@ -69,7 +68,7 @@ public class QuerySourceBuilder {
      * @param value     字段值
      * @return
      */
-    public QuerySourceBuilder matchQuery(String fieldName, Object value) {
+    public QuerySource matchQuery(String fieldName, Object value) {
         searchSourceBuilder.query(QueryBuilders.termQuery(fieldName, value));
         return this;
     }
@@ -79,7 +78,7 @@ public class QuerySourceBuilder {
      *
      * @return
      */
-    public QuerySourceBuilder matchAllQuery() {
+    public QuerySource matchAllQuery() {
         searchSourceBuilder.query(QueryBuilders.matchAllQuery());
         return this;
     }
@@ -91,7 +90,7 @@ public class QuerySourceBuilder {
      * @param sortOrder 排序
      * @return
      */
-    public QuerySourceBuilder scoreScore(SortOrder sortOrder) {
+    public QuerySource scoreScore(SortOrder sortOrder) {
         SortBuilder sortBuilder = SortBuilders.scoreSort();
         Optional.ofNullable(sortOrder).ifPresent(sortBuilder::order);
         searchSourceBuilder.sort(sortBuilder);
@@ -106,7 +105,7 @@ public class QuerySourceBuilder {
      * @param sortOrder 排序
      * @return
      */
-    public QuerySourceBuilder fieldSort(String fieldName, SortOrder sortOrder) {
+    public QuerySource fieldSort(String fieldName, SortOrder sortOrder) {
         SortBuilder<FieldSortBuilder> fieldSortBuilder = new FieldSortBuilder(fieldName);
         Optional.ofNullable(sortOrder).ifPresent(fieldSortBuilder::order);
         ///另一种构造方法
@@ -121,7 +120,7 @@ public class QuerySourceBuilder {
      * @param fieldName 字段名称
      * @return
      */
-    public QuerySourceBuilder highlighter(String fieldName) {
+    public QuerySource highlighter(String fieldName) {
         HighlightBuilder highlightBuilder = new HighlightBuilder();
         HighlightBuilder.Field field = new HighlightBuilder.Field(fieldName);
         highlightBuilder.field(field);
@@ -139,7 +138,7 @@ public class QuerySourceBuilder {
      *
      * @return
      */
-    public QuerySourceBuilder fieldSuggest(String fieldName, String fieldValue) {
+    public QuerySource fieldSuggest(String fieldName, String fieldValue) {
         SuggestBuilder suggestBuilder = new SuggestBuilder();
         TermSuggestionBuilder fieldSuggest = SuggestBuilders.termSuggestion(fieldName);
         fieldSuggest.text(fieldValue);
@@ -154,7 +153,7 @@ public class QuerySourceBuilder {
      *
      * @return
      */
-    public QuerySourceBuilder boolQuery(BoolQueryBuilder boolQueryBuilder) {
+    public QuerySource boolQuery(BoolQueryBuilder boolQueryBuilder) {
         searchSourceBuilder.query(boolQueryBuilder);
         return this;
     }
@@ -164,7 +163,7 @@ public class QuerySourceBuilder {
      *
      * @return
      */
-    public QuerySourceBuilder scoreQuery(BoolQueryBuilder boolQueryBuilder) {
+    public QuerySource scoreQuery(BoolQueryBuilder boolQueryBuilder) {
         return this;
     }
 

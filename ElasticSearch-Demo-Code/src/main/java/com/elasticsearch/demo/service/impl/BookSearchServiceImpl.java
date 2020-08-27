@@ -2,7 +2,7 @@ package com.elasticsearch.demo.service.impl;
 
 import com.elasticsearch.demo.model.Book;
 import com.elasticsearch.demo.model.BookScrollSearchBO;
-import com.elasticsearch.demo.query.QuerySourceBuilder;
+import com.elasticsearch.demo.query.QuerySource;
 import com.elasticsearch.demo.service.BookSearchService;
 import com.elasticsearch.demo.service.base.EsBaseService;
 import com.elasticsearch.demo.service.base.EsGetService;
@@ -18,15 +18,15 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.Scroll;
-import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.suggest.Suggest;
 import org.elasticsearch.search.suggest.term.TermSuggestion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,13 +38,27 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BookSearchServiceImpl extends EsBaseService implements BookSearchService {
 
-
     @Autowired
     private EsSearchScrollService searchScrollService;
+
     @Autowired
     private EsSearchService searchService;
     @Autowired
     private EsGetService getService;
+
+    private Gson gson = new GsonBuilder().create();
+
+
+    /**
+     * 根据书本id获取文档响应信息
+     *
+     * @param id 文档id
+     * @return
+     */
+    @Override
+    public GetResponse getId(String id) {
+        return getService.getById(defaultBookIndex, id);
+    }
 
     /**
      * 使用游标Scroll查询书本
@@ -65,66 +79,70 @@ public class BookSearchServiceImpl extends EsBaseService implements BookSearchSe
             searchRequest.scroll(new Scroll(TimeValue.timeValueMillis(10)));
             searchResponse = searchService.search(searchRequest);
         }
-        List<String> result = new ArrayList<>();
         bookScrollSearchBO.setScrollId(searchResponse.getScrollId());
-        SearchHit[] searchHits = searchResponse.getHits().getHits();
-        if (searchHits.length > 0) {
-            Arrays.asList(searchHits).stream().forEach(searchHit -> result.add(searchHit.getSourceAsString()));
-        }
-        Gson gson = new GsonBuilder().create();
-        bookScrollSearchBO.setBookList(result.stream().map(str -> gson.fromJson(str, Book.class)).collect(Collectors.toList()));
+        //书本响应信息
+        List<String> responseResult = getResponseList(searchResponse);
+        List<Book> bookList = responseResult.stream().map(str -> gson.fromJson(str, Book.class)).collect(Collectors.toList());
+        bookScrollSearchBO.setBookList(bookList);
         return bookScrollSearchBO;
     }
 
     @Override
     public List<Book> bookSearch() {
         SearchRequest searchRequest = new SearchRequest(defaultBookIndex);
-        QuerySourceBuilder querySourceBuilder = new QuerySourceBuilder();
-        querySourceBuilder.size(1000);
-        return getBooks(querySourceBuilder, searchRequest);
+        QuerySource querySource = new QuerySource();
+        querySource.size(1000);
+        searchRequest.source(querySource.build());
+        return getBooks(searchRequest);
     }
 
 
     @Override
-    public List<Book> conditionSearch(QuerySourceBuilder querySourceBuilder) {
+    public List<Book> conditionSearch(QuerySource querySource) {
         SearchRequest searchRequest = new SearchRequest(defaultBookIndex);
-        return getBooks(querySourceBuilder, searchRequest);
-    }
-
-    private List<Book> getBooks(QuerySourceBuilder querySourceBuilder, SearchRequest searchRequest) {
-        searchRequest.source(querySourceBuilder.build());
-        List<String> result = new ArrayList<>();
-        SearchResponse searchResponse = searchService.search(searchRequest);
-        SearchHit[] searchHits = searchResponse.getHits().getHits();
-        if (searchHits.length > 0) {
-            Arrays.asList(searchHits).stream().forEach(searchHit -> result.add(searchHit.getSourceAsString()));
-        }
-        Gson gson = new GsonBuilder().create();
-        return result.stream().map(str -> gson.fromJson(str, Book.class)).collect(Collectors.toList());
+        searchRequest.source(querySource.build());
+        return getBooks(searchRequest);
     }
 
 
     @Override
     public List<String> fieldSuggestSearch(String fieldName, String fieldValue) {
         SearchRequest searchRequest = new SearchRequest(defaultBookIndex);
-        QuerySourceBuilder querySourceBuilder = new QuerySourceBuilder();
-        querySourceBuilder.fieldSuggest(fieldName, fieldValue);
-        searchRequest.source(querySourceBuilder.build());
+        QuerySource querySource = new QuerySource();
+        querySource.fieldSuggest(fieldName, fieldValue);
+        searchRequest.source(querySource.build());
         SearchResponse searchResponse = searchService.search(searchRequest);
         Suggest suggestions = searchResponse.getSuggest();
         TermSuggestion termSuggestion = suggestions.getSuggestion(fieldName);
         return termSuggestion.getEntries().stream().map(Suggest.Suggestion.Entry::getText).map(Text::toString).collect(Collectors.toList());
     }
 
+    @Override
+    public List<Book> boolSearch() {
+        SearchRequest searchRequest = new SearchRequest(defaultBookIndex);
+        QuerySource querySource = new QuerySource();
+        //Bool查询
+        BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
+        boolQueryBuilder.must(QueryBuilders.matchQuery("title", "中"));
+        querySource.boolQuery(boolQueryBuilder);
+        SearchSourceBuilder searchSourceBuilder = querySource.build();
+        searchRequest.source(searchSourceBuilder);
+        return getBooks(searchRequest);
+    }
+
 
     /**
-     * 根据书本id获取文档响应信息
+     * 获取书本信息
      *
-     * @param id 文档id
+     * @param searchRequest
      * @return
      */
-    @Override
-    public GetResponse getId(String id) {
-        return getService.getById(defaultBookIndex, id);
+    private List<Book> getBooks(SearchRequest searchRequest) {
+        SearchResponse searchResponse = searchService.search(searchRequest);
+        List<String> responseResult = getResponseList(searchResponse);
+        if (responseResult.isEmpty()) {
+            return null;
+        }
+        return responseResult.stream().map(str -> gson.fromJson(str, Book.class)).collect(Collectors.toList());
     }
 }

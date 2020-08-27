@@ -1,7 +1,7 @@
 package com.elasticsearch.demo.controller;
 
 import com.elasticsearch.demo.common.ResultBody;
-import com.elasticsearch.demo.query.QuerySourceBuilder;
+import com.elasticsearch.demo.query.QuerySource;
 import com.elasticsearch.demo.service.BookSearchService;
 import com.elasticsearch.demo.service.BookIndexService;
 import com.google.gson.Gson;
@@ -56,7 +56,6 @@ public class BookController {
     public ResultBody DeleteIndex() {
         return ResultBody.success(bookIndexService.deleteBookIndex());
     }
-
 
 
     /**
@@ -137,7 +136,6 @@ public class BookController {
     }
 
 
-
     /**
      * 获取书本索引文档信息
      *
@@ -179,9 +177,19 @@ public class BookController {
      */
     @GetMapping("/search/condition")
     public ResultBody conditionSearch() {
-        QuerySourceBuilder querySourceBuilder = new QuerySourceBuilder();
-        querySourceBuilder.matchQuery("author", "John Burt Foster Jr.");
-        return ResultBody.success(bookSearchService.conditionSearch(querySourceBuilder));
+        QuerySource querySource = new QuerySource();
+        querySource.matchQuery("author", "John Burt Foster Jr.");
+        return ResultBody.success(bookSearchService.conditionSearch(querySource));
+    }
+
+    /**
+     * bool查询
+     *
+     * @return
+     */
+    @GetMapping("/search/bool")
+    public ResultBody boolSearch() {
+        return ResultBody.success(bookSearchService.boolSearch());
     }
 
 

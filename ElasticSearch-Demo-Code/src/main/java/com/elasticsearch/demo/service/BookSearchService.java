@@ -2,7 +2,7 @@ package com.elasticsearch.demo.service;
 
 import com.elasticsearch.demo.model.Book;
 import com.elasticsearch.demo.model.BookScrollSearchBO;
-import com.elasticsearch.demo.query.QuerySourceBuilder;
+import com.elasticsearch.demo.query.QuerySource;
 import org.elasticsearch.action.get.GetResponse;
 
 import java.util.List;
@@ -14,8 +14,6 @@ import java.util.List;
  * @Date: 2020/8/27 11:22
  */
 public interface BookSearchService {
-
-
 
 
     /**
@@ -44,10 +42,10 @@ public interface BookSearchService {
     /**
      * 条件查询
      *
-     * @param querySourceBuilder
+     * @param querySource
      * @return
      */
-    List<Book> conditionSearch(QuerySourceBuilder querySourceBuilder);
+    List<Book> conditionSearch(QuerySource querySource);
 
     /**
      * 书本标题建议查询
@@ -57,4 +55,11 @@ public interface BookSearchService {
      * @return
      */
     List<String> fieldSuggestSearch(String fieldName, String fieldValue);
+
+    /**
+     * 书本bool查询
+     *
+     * @return
+     */
+    List<Book> boolSearch();
 }

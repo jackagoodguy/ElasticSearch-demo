@@ -1,5 +1,6 @@
 package com.elasticsearch.demo.model;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -14,6 +15,8 @@ import java.io.Serializable;
 public class Book implements Serializable {
 
 
+    @TableId
+    private String id;
     /**
      * ISBN
      */
