@@ -43,7 +43,7 @@ public class EsSearchServiceImpl extends EsBaseService implements EsSearchServic
     }
 
     /**
-     * 油表查询
+     * 游标查询
      *
      * @param scrollRequest 游标请求
      * @return

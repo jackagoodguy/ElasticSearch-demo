@@ -2,21 +2,14 @@ package com.elasticsearch.demo.service;
 
 
 import com.elasticsearch.demo.enums.EsIndexFieldTypeEnum;
-import com.elasticsearch.demo.model.Book;
-import com.elasticsearch.demo.model.BookScrollSearchBO;
 import com.elasticsearch.demo.model.indexmapping.BaseMapping;
 import com.elasticsearch.demo.model.indexmapping.BookMapping;
 import com.elasticsearch.demo.model.indexmapping.MappingFieldProperties;
-import com.elasticsearch.demo.query.QuerySourceBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
-import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.core.TermVectorsResponse;
 import org.elasticsearch.client.indices.GetIndexResponse;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * 书本服务
@@ -24,7 +17,7 @@ import java.util.Map;
  * @Author: ShayLau
  * @Date: 2020/8/18 17:08
  */
-public interface BookService {
+public interface BookIndexService {
 
     /**
      * 默认书本映射关系
@@ -69,14 +62,6 @@ public interface BookService {
      */
     boolean deleteBookIndex();
 
-
-    /**
-     * 根据书本id获取文档响应信息
-     *
-     * @param id 文档id
-     * @return
-     */
-    GetResponse getId(String id);
 
     /**
      * 书本索引别名处理
@@ -125,35 +110,4 @@ public interface BookService {
      */
     void scanDbToEs(String indexName);
 
-    /**
-     * 使用游标Scroll查询书本
-     *
-     * @param scrollId scrollId
-     * @return
-     */
-    BookScrollSearchBO bookScrollSearch(String scrollId);
-
-    /**
-     * 书本查询
-     *
-     * @return
-     */
-    List<Book> bookSearch();
-
-    /**
-     * 条件查询
-     *
-     * @param querySourceBuilder
-     * @return
-     */
-    List<Book> conditionSearch(QuerySourceBuilder querySourceBuilder);
-
-    /**
-     * 书本标题建议查询
-     *
-     * @param fieldName  字段名称
-     * @param fieldValue 字段内容
-     * @return
-     */
-    List<String> fieldSuggestSearch(String fieldName, String fieldValue);
 }

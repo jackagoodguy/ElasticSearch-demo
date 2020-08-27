@@ -1,17 +1,13 @@
 package com.elasticsearch.demo.service.impl;
 
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.elasticsearch.demo.common.Constant;
 import com.elasticsearch.demo.enums.EsIndexFieldTypeEnum;
 import com.elasticsearch.demo.mapper.BookMapper;
 import com.elasticsearch.demo.model.Book;
-import com.elasticsearch.demo.model.BookScrollSearchBO;
 import com.elasticsearch.demo.model.indexmapping.BaseMapping;
 import com.elasticsearch.demo.model.indexmapping.BookMapping;
 import com.elasticsearch.demo.model.indexmapping.MappingFieldProperties;
-import com.elasticsearch.demo.query.QuerySourceBuilder;
-import com.elasticsearch.demo.service.BookService;
+import com.elasticsearch.demo.service.BookIndexService;
 import com.elasticsearch.demo.service.base.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -19,32 +15,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.client.core.TermVectorsRequest;
 import org.elasticsearch.client.core.TermVectorsResponse;
 import org.elasticsearch.client.indices.*;
-import org.elasticsearch.common.text.Text;
-import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
-import org.elasticsearch.index.search.MatchQuery;
-import org.elasticsearch.search.Scroll;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.suggest.Suggest;
-import org.elasticsearch.search.suggest.term.TermSuggestion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 书本服务
@@ -53,34 +33,14 @@ import java.util.stream.Collectors;
  * @Date: 2020/8/18 17:09
  */
 @Service
-public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements BookService {
+public class BookIndexServiceImpl extends EsBaseService<BookMapper, Book> implements BookIndexService {
 
     @Autowired
     private EsIndexService indexService;
     @Autowired
-    private EsGetService getService;
-    @Autowired
     private EsTermVectorsService termVectorsService;
     @Autowired
     private EsBulkService bulkService;
-    @Autowired
-    private EsSearchScrollService searchScrollService;
-    @Autowired
-    private EsSearchService searchService;
-
-    /**
-     * 索引名称
-     */
-    private final String defaultBookIndex = Constant.DEFAULT_ES_INDEX_NAME;
-
-    /**
-     * 设置书本索引名称
-     *
-     * @param indexName 给定索引名称
-     */
-    private String getBookIndexName(String indexName) {
-        return StringUtils.isNotBlank(indexName) ? indexName : defaultBookIndex;
-    }
 
     /**
      * 创建书本索引
@@ -97,7 +57,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
             if (StringUtils.isNotBlank(mapping)) {
                 createIndexRequest.mapping(mapping, XContentType.JSON);
             } else {
-                createIndexRequest.mapping(BookService.defaultIndexMapping(), XContentType.JSON);
+                createIndexRequest.mapping(BookIndexService.defaultIndexMapping(), XContentType.JSON);
             }
             CreateIndexResponse createIndexResponse = indexService.createIndex(createIndexRequest);
             return createIndexResponse.isAcknowledged();
@@ -129,16 +89,6 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         return indexService.deleteIndex(deleteIndexRequest);
     }
 
-    /**
-     * 根据书本id获取文档响应信息
-     *
-     * @param id 文档id
-     * @return
-     */
-    @Override
-    public GetResponse getId(String id) {
-        return getService.getById(defaultBookIndex, id);
-    }
 
     /**
      * 书本索引别名处理
@@ -223,73 +173,5 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         bulkService.bulkAsyncOperation(bulkRequest);
     }
 
-    /**
-     * 使用游标Scroll查询书本
-     *
-     * @param scrollId scrollId
-     * @return
-     */
-    @Override
-    public BookScrollSearchBO bookScrollSearch(String scrollId) {
-        BookScrollSearchBO bookScrollSearchBO = new BookScrollSearchBO();
-        SearchResponse searchResponse;
-        if (StringUtils.isNotBlank(scrollId)) {
-            SearchScrollRequest searchScrollRequest = new SearchScrollRequest(scrollId);
-            searchScrollRequest.scroll(TimeValue.timeValueMillis(10));
-            searchResponse = searchService.scrollSearch(searchScrollRequest);
-        } else {
-            SearchRequest searchRequest = new SearchRequest(defaultBookIndex);
-            searchRequest.scroll(new Scroll(TimeValue.timeValueMillis(10)));
-            searchResponse = searchService.search(searchRequest);
-        }
-        List<String> result = new ArrayList<>();
-        bookScrollSearchBO.setScrollId(searchResponse.getScrollId());
-        SearchHit[] searchHits = searchResponse.getHits().getHits();
-        if (searchHits.length > 0) {
-            Arrays.asList(searchHits).stream().forEach(searchHit -> result.add(searchHit.getSourceAsString()));
-        }
-        Gson gson = new GsonBuilder().create();
-        bookScrollSearchBO.setBookList(result.stream().map(str -> gson.fromJson(str, Book.class)).collect(Collectors.toList()));
-        return bookScrollSearchBO;
-    }
 
-    @Override
-    public List<Book> bookSearch() {
-        SearchRequest searchRequest = new SearchRequest(defaultBookIndex);
-        QuerySourceBuilder querySourceBuilder = new QuerySourceBuilder();
-        querySourceBuilder.size(1000);
-        return getBooks(querySourceBuilder, searchRequest);
-    }
-
-
-    @Override
-    public List<Book> conditionSearch(QuerySourceBuilder querySourceBuilder) {
-        SearchRequest searchRequest = new SearchRequest(defaultBookIndex);
-        return getBooks(querySourceBuilder, searchRequest);
-    }
-
-    private List<Book> getBooks(QuerySourceBuilder querySourceBuilder, SearchRequest searchRequest) {
-        searchRequest.source(querySourceBuilder.build());
-        List<String> result = new ArrayList<>();
-        SearchResponse searchResponse = searchService.search(searchRequest);
-        SearchHit[] searchHits = searchResponse.getHits().getHits();
-        if (searchHits.length > 0) {
-            Arrays.asList(searchHits).stream().forEach(searchHit -> result.add(searchHit.getSourceAsString()));
-        }
-        Gson gson = new GsonBuilder().create();
-        return result.stream().map(str -> gson.fromJson(str, Book.class)).collect(Collectors.toList());
-    }
-
-
-    @Override
-    public List<String> fieldSuggestSearch(String fieldName, String fieldValue) {
-        SearchRequest searchRequest = new SearchRequest(defaultBookIndex);
-        QuerySourceBuilder querySourceBuilder = new QuerySourceBuilder();
-        querySourceBuilder.fieldSuggest(fieldName, fieldValue);
-        searchRequest.source(querySourceBuilder.build());
-        SearchResponse searchResponse = searchService.search(searchRequest);
-        Suggest suggestions = searchResponse.getSuggest();
-        TermSuggestion termSuggestion = suggestions.getSuggestion(fieldName);
-        return termSuggestion.getEntries().stream().map(Suggest.Suggestion.Entry::getText).map(Text::toString).collect(Collectors.toList());
-    }
 }

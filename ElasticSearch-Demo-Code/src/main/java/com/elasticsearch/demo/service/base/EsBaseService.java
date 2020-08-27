@@ -1,6 +1,9 @@
 package com.elasticsearch.demo.service.base;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.elasticsearch.demo.common.Constant;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,10 +20,25 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
-public class EsBaseService {
+public class EsBaseService<M, T> extends ServiceImpl {
 
     @Autowired
     public RestHighLevelClient highLevelClient;
+
+
+    /**
+     * 索引名称
+     */
+    public final String defaultBookIndex = Constant.DEFAULT_ES_INDEX_NAME;
+
+    /**
+     * 设置书本索引名称
+     *
+     * @param indexName 给定索引名称
+     */
+    public String getBookIndexName(String indexName) {
+        return StringUtils.isNotBlank(indexName) ? indexName : defaultBookIndex;
+    }
 
 
 }

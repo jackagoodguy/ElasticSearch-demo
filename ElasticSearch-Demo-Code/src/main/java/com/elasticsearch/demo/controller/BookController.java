@@ -2,7 +2,8 @@ package com.elasticsearch.demo.controller;
 
 import com.elasticsearch.demo.common.ResultBody;
 import com.elasticsearch.demo.query.QuerySourceBuilder;
-import com.elasticsearch.demo.service.BookService;
+import com.elasticsearch.demo.service.BookSearchService;
+import com.elasticsearch.demo.service.BookIndexService;
 import com.google.gson.Gson;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.get.GetResponse;
@@ -20,8 +21,9 @@ import org.springframework.web.bind.annotation.*;
 public class BookController {
 
     @Autowired
-    private BookService bookService;
-
+    private BookIndexService bookIndexService;
+    @Autowired
+    private BookSearchService bookSearchService;
 
     /**
      * 创建书本索引
@@ -31,7 +33,7 @@ public class BookController {
      */
     @PostMapping("/index")
     public ResultBody createBookIndex(@RequestParam(required = false) String mapping) {
-        return ResultBody.success(bookService.createBookIndex(mapping));
+        return ResultBody.success(bookIndexService.createBookIndex(mapping));
     }
 
     /**
@@ -41,7 +43,7 @@ public class BookController {
      */
     @GetMapping("/index")
     public ResultBody getIndex() {
-        return ResultBody.success(new Gson().toJson(bookService.getBookIndex()));
+        return ResultBody.success(new Gson().toJson(bookIndexService.getBookIndex()));
     }
 
 
@@ -52,20 +54,9 @@ public class BookController {
      */
     @DeleteMapping("/index")
     public ResultBody DeleteIndex() {
-        return ResultBody.success(bookService.deleteBookIndex());
+        return ResultBody.success(bookIndexService.deleteBookIndex());
     }
 
-    /**
-     * 获取书本索引文档信息
-     *
-     * @param id 书本索引id
-     * @return
-     */
-    @GetMapping("")
-    public ResultBody getDocumentById(@RequestParam String id) {
-        GetResponse getResponse = bookService.getId(id);
-        return ResultBody.success(getResponse);
-    }
 
 
     /**
@@ -86,7 +77,7 @@ public class BookController {
      */
     @PutMapping("/index/mapping")
     public ResultBody putIndexMapping() {
-        return ResultBody.success(bookService.putIndexMapping());
+        return ResultBody.success(bookIndexService.putIndexMapping());
     }
 
 
@@ -99,7 +90,7 @@ public class BookController {
      */
     @PostMapping("/index/alias")
     public ResultBody addBookIndexAlias(@RequestParam(required = false) String bookIndexName, @RequestParam String aliasName) {
-        return ResultBody.success(bookService.bookIndexAlias(bookIndexName, aliasName, IndicesAliasesRequest.AliasActions.Type.ADD));
+        return ResultBody.success(bookIndexService.bookIndexAlias(bookIndexName, aliasName, IndicesAliasesRequest.AliasActions.Type.ADD));
     }
 
 
@@ -112,8 +103,9 @@ public class BookController {
      */
     @DeleteMapping("/index/alias")
     public ResultBody removeBookIndexAlias(@RequestParam(required = false) String bookIndexName, @RequestParam String aliasName) {
-        return ResultBody.success(bookService.bookIndexAlias(bookIndexName, aliasName, IndicesAliasesRequest.AliasActions.Type.REMOVE));
+        return ResultBody.success(bookIndexService.bookIndexAlias(bookIndexName, aliasName, IndicesAliasesRequest.AliasActions.Type.REMOVE));
     }
+
 
     /**
      * 复制索引信息
@@ -128,7 +120,7 @@ public class BookController {
      */
     @PostMapping("/reIndex")
     public ResultBody reBookIndex(@RequestParam String oldIndexName, @RequestParam String newIndexName) {
-        bookService.reBookIndex(oldIndexName.toLowerCase(), newIndexName.toLowerCase());
+        bookIndexService.reBookIndex(oldIndexName.toLowerCase(), newIndexName.toLowerCase());
         return ResultBody.success();
     }
 
@@ -140,8 +132,22 @@ public class BookController {
      */
     @PostMapping("/scan")
     public ResultBody scanDbToEs(@RequestParam(required = false) String bookIndexName) {
-        bookService.scanDbToEs(bookIndexName);
+        bookIndexService.scanDbToEs(bookIndexName);
         return ResultBody.success();
+    }
+
+
+
+    /**
+     * 获取书本索引文档信息
+     *
+     * @param id 书本索引id
+     * @return
+     */
+    @GetMapping("")
+    public ResultBody getDocumentById(@RequestParam String id) {
+        GetResponse getResponse = bookSearchService.getId(id);
+        return ResultBody.success(getResponse);
     }
 
 
@@ -152,7 +158,7 @@ public class BookController {
      */
     @GetMapping("/search")
     public ResultBody searchBook() {
-        return ResultBody.success(bookService.bookSearch());
+        return ResultBody.success(bookSearchService.bookSearch());
     }
 
     /**
@@ -163,7 +169,7 @@ public class BookController {
      */
     @GetMapping("/search/scroll")
     public ResultBody scrollSearchBook(@RequestParam(required = false) String scrollId) {
-        return ResultBody.success(bookService.bookScrollSearch(scrollId));
+        return ResultBody.success(bookSearchService.bookScrollSearch(scrollId));
     }
 
     /**
@@ -175,7 +181,7 @@ public class BookController {
     public ResultBody conditionSearch() {
         QuerySourceBuilder querySourceBuilder = new QuerySourceBuilder();
         querySourceBuilder.matchQuery("author", "John Burt Foster Jr.");
-        return ResultBody.success(bookService.conditionSearch(querySourceBuilder));
+        return ResultBody.success(bookSearchService.conditionSearch(querySourceBuilder));
     }
 
 
@@ -186,7 +192,7 @@ public class BookController {
      */
     @PostMapping("/field/suggest")
     public ResultBody fieldSuggest(String fieldName, String fieldValue) {
-        return ResultBody.success(bookService.fieldSuggestSearch(fieldName, fieldValue));
+        return ResultBody.success(bookSearchService.fieldSuggestSearch(fieldName, fieldValue));
     }
 
 
