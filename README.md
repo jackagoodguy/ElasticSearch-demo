@@ -1,3 +1,7 @@
+---
+typora-copy-images-to: img
+---
+
 # ELK 部署说明
 
 <a name="jkxNv"></a>
@@ -55,4 +59,4 @@
 
 ### 项目交流
 
-https://cdn.nlark.com/yuque/0/2020/png/236129/1599117807281-08f84de8-ddc3-4424-8e49-917714c31e76.png
+[qq群](https://github.com/ShayLau/ElasticSearch-demo/blob/master/img/Java%E7%BC%96%E7%A0%81%E6%97%A5%E5%BF%97%E7%BE%A4%E4%BA%8C%E7%BB%B4%E7%A0%81.png)
