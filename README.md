@@ -55,4 +55,4 @@
 
 ### 项目交流
 
-![img]()![Java编码日志群二维码.png](https://cdn.nlark.com/yuque/0/2020/png/236129/1599117807281-08f84de8-ddc3-4424-8e49-917714c31e76.png)
+https://cdn.nlark.com/yuque/0/2020/png/236129/1599117807281-08f84de8-ddc3-4424-8e49-917714c31e76.png
